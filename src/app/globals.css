@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --brand-pulse: #38BDF8;
+  --brand-deep: #0284C7;
+  --obsidian: #0F172A;
+  --slate-text: #64748B;
+  --cloud-line: #E8EDF5;
+  --frost: #F8FAFC;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #F1F5F9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #38BDF8; }
+
+/* Input focus rings */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+/* Range slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #E2E8F0;
+  border-radius: 99px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #0284C7;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(2,132,199,0.4);
+  border: 2px solid white;
+}
+input[type="range"]:disabled::-webkit-slider-thumb {
+  background: #94A3B8;
+}
+
+/* Transitions */
+.nav-link {
+  transition: all 0.15s ease;
+}
+
+/* Auth page gradient */
+.auth-gradient {
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #0284C7 100%);
+}

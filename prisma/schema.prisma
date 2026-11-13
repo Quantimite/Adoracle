@@ -1,0 +1,97 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Workspace {
+  id              String            @id @default(uuid())
+  name            String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  integrations    IntegrationToken[]
+  businessProfile BusinessProfile?
+  campaigns       Campaign[]
+  lessons         LearningLesson[]
+  seoAudits       SeoAudit[]
+}
+
+model IntegrationToken {
+  id           String    @id @default(uuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platform     Platform
+  accessToken  String    // Encrypted via AES-256
+  refreshToken String?   // Encrypted via AES-256
+  expiresAt    DateTime?
+  connectedAt  DateTime  @default(now())
+}
+
+model BusinessProfile {
+  id             String    @id @default(uuid())
+  workspaceId    String    @unique
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  websiteUrl     String
+  offerings      String
+  priceTier      String    // LOW, MID, HIGH
+  targetAudience String
+  reachType      String    // LOCAL, NATIONAL, GLOBAL
+  scrapedAt      DateTime  @default(now())
+}
+
+model Campaign {
+  id              String         @id @default(uuid())
+  workspaceId     String
+  workspace       Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platform        Platform
+  name            String
+  status          CampaignStatus @default(ACTIVE)
+  dailyBudget     Float
+  customersWon    Int            @default(0)
+  costPerCustomer Float          @default(0.0)
+  totalSpend      Float          @default(0.0)
+  aiOptimizing    Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model LearningLesson {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category    String    // e.g., "Winning Offer-Lead Headlines", "Best Converting Hours"
+  description String
+  confidence  String    // "High Confidence", "Medium Confidence"
+  createdAt   DateTime  @default(now())
+}
+
+model SeoAudit {
+  id                String   @id @default(uuid())
+  workspaceId       String
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  healthScore       Int      // e.g., 88
+  organicClicks     Int
+  searchImpressions Int
+  coreWebVitals     Boolean  // True if 3/3 met
+  brokenLinksCount  Int      // Triggers Crimson Red banner if > 0
+  auditedAt         DateTime @default(now())
+}
+
+enum Platform {
+  META
+  TIKTOK
+  GOOGLE
+  YOUTUBE
+  LINKEDIN
+}
+
+enum CampaignStatus {
+  ACTIVE
+  LEARNING
+  ERROR
+  PAUSED
+}
+
