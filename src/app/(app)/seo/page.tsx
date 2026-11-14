@@ -70,7 +70,7 @@ export default function SeoPage() {
       )}
 
       {/* Health metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
         {/* Health score */}
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col items-center justify-center text-center">
           <div className="relative w-20 h-20 mb-3">

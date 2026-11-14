@@ -79,7 +79,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row bg-frostWhite text-obsidianBlack selection:bg-skyPulse selection:text-obsidianBlack">
       {/* LEFT PANEL: Modern Artistic Brand & AI Showcase */}
-      <div className="relative lg:w-[52%] bg-obsidianBlack text-pureWhite p-8 sm:p-10 lg:px-14 lg:py-10 flex flex-col justify-between overflow-hidden">
+      <div className="relative lg:w-[52%] bg-obsidianBlack text-pureWhite p-5 sm:p-10 lg:px-14 lg:py-10 flex flex-col justify-between overflow-hidden">
         {/* Artistic Ambient Glows & Subtle Grid Overlay */}
         <div
           className="pointer-events-none absolute -top-28 -left-28 w-[460px] h-[460px] rounded-full opacity-25 blur-3xl"
@@ -173,9 +173,9 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT PANEL: Compact Zero-Scroll Authentication Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:px-12 lg:py-6 bg-frostWhite">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 lg:px-12 lg:py-6 bg-frostWhite">
         <div className="w-full max-w-md">
-          <div className="bg-pureWhite p-7 sm:p-8 rounded-3xl border border-cloudLine shadow-xl shadow-slate-200/60">
+          <div className="bg-pureWhite p-5 sm:p-8 rounded-3xl border border-cloudLine shadow-xl shadow-slate-200/60">
             <div className="mb-5">
               <h2 className="text-2xl font-extrabold tracking-tight text-obsidianBlack">
                 Welcome back

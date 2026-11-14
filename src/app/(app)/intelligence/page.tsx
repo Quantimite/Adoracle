@@ -25,19 +25,19 @@ export default function IntelligencePage() {
   return (
     <div className="space-y-8 pb-10">
       {/* Header */}
-      <div className="flex items-start justify-between pt-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">AI Intelligence</h1>
           <p className="text-slate-500 mt-1 text-sm">Your AI is learning and improving every day</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 rounded-xl">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 rounded-xl self-start sm:self-auto">
           <BrainCircuit className="w-4 h-4 text-sky-400" />
           <span className="text-sm font-bold text-white">94.2% Accuracy</span>
         </div>
       </div>
 
       {/* Accuracy stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
         {[
           { label: 'Day 1 Error', value: '18.1%', sub: 'Cold start', color: 'text-red-500' },
           { label: 'Day 7 Error', value: '2.3%', sub: 'Learning phase', color: 'text-amber-500' },

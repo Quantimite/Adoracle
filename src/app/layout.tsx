@@ -1,7 +1,13 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { ModeProvider } from '@/components/shared/ModeContext';
 import { ThemeProvider } from '@/components/shared/ThemeContext';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   title: 'Adoracle — Unified Ad Management & Business Intelligence',

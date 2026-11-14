@@ -94,6 +94,17 @@ input[type="range"]:disabled::-webkit-slider-thumb {
 @tailwind components;
 @tailwind utilities;
 
+/* Utilities */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 @layer base {
   body {
     @apply bg-frostWhite text-obsidianBlack antialiased;

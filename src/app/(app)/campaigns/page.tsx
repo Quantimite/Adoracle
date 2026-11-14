@@ -436,7 +436,7 @@ export default function CampaignsAnalyticsPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
             {platformBudgetShares.map((seg) => {
               const isSelected = selectedPlatform === seg.id;
               return (
@@ -576,7 +576,7 @@ export default function CampaignsAnalyticsPage() {
                   </div>
 
                   {/* Middle: Metrics */}
-                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 sm:gap-8 xl:px-6 xl:border-x border-emerald-100/90 dark:border-slate-800 shrink-0">
+                  <div className="grid grid-cols-2 sm:flex sm:items-center gap-4 sm:gap-6 xl:px-6 xl:border-x border-emerald-100/90 dark:border-slate-800 shrink-0">
                     <div>
                       <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Customers Won</span>
                       <span className="text-lg font-extrabold text-slate-900 dark:text-white">{camp.customersWon}</span>

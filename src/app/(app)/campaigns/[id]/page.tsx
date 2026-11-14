@@ -318,16 +318,16 @@ export default function CampaignAdManagerPage() {
             className="space-y-7 pb-20 max-w-6xl mx-auto"
         >
             {/* Top Header Navigation */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <Link
                     href="/campaigns"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors shadow-sm self-start sm:self-auto"
                 >
                     <ArrowLeft size={14} />
                     <span>Back to All Campaigns</span>
                 </Link>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#ECFDF5] text-[#114B32] text-xs font-bold">
                         <RealPlatformLogo id={currentCampaign.platform} size={15} />
                         <span>{currentCampaign.platformLabel} Ad Manager</span>
@@ -374,7 +374,7 @@ export default function CampaignAdManagerPage() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-3 md:col-span-2 justify-end">
+                    <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 md:col-span-2 md:justify-end">
                         <button
                             type="button"
                             onClick={toggleAiPilot}
@@ -453,7 +453,7 @@ export default function CampaignAdManagerPage() {
             </div>
 
             {/* Tabs Switcher */}
-            <div className="flex items-center gap-2 border-b border-emerald-200/60 dark:border-slate-800 pb-3">
+            <div className="flex items-center gap-2 border-b border-emerald-200/60 dark:border-slate-800 pb-3 overflow-x-auto no-scrollbar max-w-full">
                 <button
                     type="button"
                     onClick={() => setActiveTab('ads')}
@@ -557,7 +557,7 @@ export default function CampaignAdManagerPage() {
                                         </div>
 
                                         {/* Ad Metrics */}
-                                        <div className="flex items-center gap-5 sm:gap-7 border-y lg:border-y-0 lg:border-x border-slate-100 dark:border-slate-800 py-4 lg:py-0 lg:px-6 shrink-0">
+                                        <div className="grid grid-cols-2 sm:flex sm:items-center gap-4 sm:gap-7 border-y lg:border-y-0 lg:border-x border-slate-100 dark:border-slate-800 py-4 lg:py-0 lg:px-6 shrink-0">
                                             <div>
                                                 <span className="text-[10px] text-slate-400 block">Spend</span>
                                                 <span className="text-sm font-extrabold text-slate-900 dark:text-white">${ad.spend}</span>
@@ -700,7 +700,7 @@ export default function CampaignAdManagerPage() {
                             initial={{ opacity: 0, scale: 0.95, y: 15 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-emerald-200 p-7 sm:p-8 space-y-6 my-auto"
+                            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-emerald-200 p-4 sm:p-7 space-y-6 my-auto"
                         >
                             {/* Modal Header */}
                             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
