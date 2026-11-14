@@ -19,9 +19,9 @@ import {
 } from 'lucide-react';
 import { useMode } from '@/components/shared/ModeContext';
 
-export type PlatformFilter = 'all' | 'meta' | 'tiktok' | 'google' | 'youtube' | 'linkedin';
+type PlatformFilter = 'all' | 'meta' | 'tiktok' | 'google' | 'youtube' | 'linkedin';
 
-export interface CampaignItem {
+interface CampaignItem {
   id: string;
   platform: Exclude<PlatformFilter, 'all'>;
   platformLabel: string;
@@ -42,7 +42,7 @@ export interface CampaignItem {
   historyLog: { date: string; spend: number; revenue: number; buyers: number }[];
 }
 
-export const INITIAL_CAMPAIGNS: CampaignItem[] = [
+const INITIAL_CAMPAIGNS: CampaignItem[] = [
   {
     id: 'camp-meta-1',
     platform: 'meta',
@@ -157,7 +157,7 @@ export const INITIAL_CAMPAIGNS: CampaignItem[] = [
   },
 ];
 
-export const PLATFORM_SEGMENT_COLORS: Record<
+const PLATFORM_SEGMENT_COLORS: Record<
   Exclude<PlatformFilter, 'all'>,
   { bar: string; text: string; ring: string }
 > = {
@@ -168,7 +168,7 @@ export const PLATFORM_SEGMENT_COLORS: Record<
   youtube: { bar: '#A3E635', text: '#1A2E05', ring: 'ring-lime-400' },
 };
 
-export function RealPlatformLogo({ id, size = 16 }: { id: Exclude<PlatformFilter, 'all'>; size?: number }) {
+function RealPlatformLogo({ id, size = 16 }: { id: Exclude<PlatformFilter, 'all'>; size?: number }) {
   switch (id) {
     case 'meta':
       return (
@@ -233,7 +233,7 @@ export function RealPlatformLogo({ id, size = 16 }: { id: Exclude<PlatformFilter
   }
 }
 
-export function EmeraldBudgetSlider({
+function EmeraldBudgetSlider({
   value,
   min = 15,
   max = 400,

@@ -26,7 +26,7 @@ import {
     Lock,
 } from 'lucide-react';
 
-export interface AdCreativeItem {
+interface AdCreativeItem {
     id: string;
     name: string;
     type: 'Video' | 'Carousel' | 'Image';
@@ -42,7 +42,7 @@ export interface AdCreativeItem {
     conversions: number;
 }
 
-export interface CampaignItem {
+interface CampaignItem {
     id: string;
     platform: 'meta' | 'tiktok' | 'google' | 'youtube' | 'linkedin';
     platformLabel: string;
@@ -64,7 +64,7 @@ export interface CampaignItem {
     adCreatives: AdCreativeItem[];
 }
 
-export const INITIAL_CAMPAIGNS: CampaignItem[] = [
+const INITIAL_CAMPAIGNS: CampaignItem[] = [
     {
         id: 'camp-meta-1',
         platform: 'meta',
@@ -127,7 +127,7 @@ export const INITIAL_CAMPAIGNS: CampaignItem[] = [
     },
 ];
 
-export function RealPlatformLogo({ id, size = 16 }: { id: string; size?: number }) {
+function RealPlatformLogo({ id, size = 16 }: { id: string; size?: number }) {
     switch (id) {
         case 'meta':
             return (
@@ -156,7 +156,7 @@ export function RealPlatformLogo({ id, size = 16 }: { id: string; size?: number 
     }
 }
 
-export function EmeraldBudgetSlider({
+function EmeraldBudgetSlider({
     value,
     min = 15,
     max = 400,
