@@ -1,7 +1,23 @@
+// src/app/layout.tsx
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import { ModeProvider } from '@/components/shared/ModeContext';
 import { ThemeProvider } from '@/components/shared/ThemeContext';
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -30,8 +46,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="bg-[#F6F8FB] dark:bg-[#0B1120] text-obsidianBlack dark:text-slate-100 font-sans antialiased transition-colors duration-300">
+    <html
+      lang="en"
+      className={`${plusJakarta.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-[#F4F9F6] dark:bg-[#08110E] text-[#0D1F18] dark:text-[#ECFDF5] font-sans text-[15px] sm:text-base leading-relaxed antialiased selection:bg-[#169C69] selection:text-white transition-colors duration-300">
         <ThemeProvider>
           <ModeProvider>{children}</ModeProvider>
         </ThemeProvider>

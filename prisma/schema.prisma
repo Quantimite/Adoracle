@@ -7,16 +7,82 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ==========================================
+// 1. AUTH.JS (NEXTAUTH V5) & WORKSPACE OWNERSHIP
+// ==========================================
+
+model User {
+  id            String            @id @default(cuid())
+  name          String?
+  email         String            @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  jobTitle      String?           @default("Growth & Performance Lead")
+  currency      String            @default("USD ($)")
+  plainLanguage Boolean           @default(true)
+  linkGuard     Boolean           @default(true)
+  accounts      Account[]
+  sessions      Session[]
+  workspaces    WorkspaceMember[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  userId      String
+  workspaceId String
+  role        String    @default("OWNER") // OWNER, ADMIN, VIEWER
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+// ==========================================
+// 2. YOUR EXISTING ADORACLE WORKSPACE MODELS
+// ==========================================
+
 model Workspace {
-  id              String            @id @default(uuid())
+  id              String             @id @default(uuid())
   name            String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  members         WorkspaceMember[]
   integrations    IntegrationToken[]
   businessProfile BusinessProfile?
   campaigns       Campaign[]
   lessons         LearningLesson[]
   seoAudits       SeoAudit[]
+  urlAudits       UrlAudit[]
 }
 
 model IntegrationToken {
@@ -24,10 +90,16 @@ model IntegrationToken {
   workspaceId  String
   workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   platform     Platform
-  accessToken  String    // Encrypted via AES-256
-  refreshToken String?   // Encrypted via AES-256
+  accountId    String    // Real Ad Account ID (e.g. "act_123456789")
+  accountName  String?
+  accessToken  String    @db.Text // Encrypted via AES-256
+  refreshToken String?   @db.Text // Encrypted via AES-256
+  status       String    @default("CONNECTED")
   expiresAt    DateTime?
   connectedAt  DateTime  @default(now())
+  lastSyncedAt DateTime  @default(now())
+
+  @@unique([workspaceId, platform, accountId])
 }
 
 model BusinessProfile {
@@ -43,19 +115,27 @@ model BusinessProfile {
 }
 
 model Campaign {
-  id              String         @id @default(uuid())
-  workspaceId     String
-  workspace       Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  platform        Platform
-  name            String
-  status          CampaignStatus @default(ACTIVE)
-  dailyBudget     Float
-  customersWon    Int            @default(0)
-  costPerCustomer Float          @default(0.0)
-  totalSpend      Float          @default(0.0)
-  aiOptimizing    Boolean        @default(true)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                 String         @id @default(uuid())
+  workspaceId        String
+  workspace          Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platform           Platform
+  externalCampaignId String         // Real ID from Meta / Google / TikTok / LinkedIn
+  name               String
+  status             CampaignStatus @default(ACTIVE)
+  destinationUrl     String?
+  dailyBudget        Float          @default(0.0)
+  customersWon       Int            @default(0) // Maps to conversions
+  costPerCustomer    Float          @default(0.0) // Maps to CPA
+  totalSpend         Float          @default(0.0)
+  revenue            Float          @default(0.0)
+  impressions        Int            @default(0)
+  clicks             Int            @default(0)
+  roas               Float          @default(0.0)
+  aiOptimizing       Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@unique([workspaceId, platform, externalCampaignId])
 }
 
 model LearningLesson {
@@ -69,15 +149,27 @@ model LearningLesson {
 }
 
 model SeoAudit {
-  id                String   @id @default(uuid())
+  id                String    @id @default(uuid())
   workspaceId       String
   workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  healthScore       Int      // e.g., 88
+  healthScore       Int       // e.g., 88
   organicClicks     Int
   searchImpressions Int
-  coreWebVitals     Boolean  // True if 3/3 met
-  brokenLinksCount  Int      // Triggers Crimson Red banner if > 0
-  auditedAt         DateTime @default(now())
+  coreWebVitals     Boolean   // True if 3/3 met
+  brokenLinksCount  Int       // Triggers Crimson Red banner if > 0
+  auditedAt         DateTime  @default(now())
+}
+
+model UrlAudit {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  url         String
+  statusCode  Int
+  isHealthy   Boolean
+  redirectUrl String?
+  responseMs  Int
+  checkedAt   DateTime  @default(now())
 }
 
 enum Platform {
@@ -94,4 +186,3 @@ enum CampaignStatus {
   ERROR
   PAUSED
 }
-
