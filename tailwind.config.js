@@ -1,48 +1,49 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+// tailwind.config.ts
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
   darkMode: 'class',
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'Plus Jakarta Sans', 'sans-serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
+      },
       colors: {
-        // New Organic Forest Emerald Palette
-        forestDeep: "#114B32",
-        forestPrimary: "#1B6B48",
-        emeraldAccent: "#229A63",
-        mintSoft: "#E6F4ED",
-        sageCanvas: "#F5F7F6",
+        // Legacy tokens mapped directly to the new Multi-Tone Green System
+        skyPulse: '#10B981',      // Mint Pulse
+        deepSky: '#169C69',       // Emerald Primary
+        obsidianBlack: '#0B1F17', // Deep Forest Ink
+        frostWhite: '#EFF7F3',    // Soft Sage Canvas
+        cloudLine: '#B7DEC9',     // Botanical Sage Border
+        pureWhite: '#FFFFFF',
+        emeraldGreen: '#10B981',
+        crimsonRed: '#E12D39',
+        slateGray: '#4B6358',     // Muted Sage-Slate text
 
-        // Nested Brand & Status Tokens (Preserved for existing components)
-        brand: {
-          pulse: "#1B6B48",
-          deep: "#114B32",
+        // Dedicated Multi-Green Tokens for New Components
+        forest: {
+          950: '#07130F',
+          900: '#0D241C',
+          800: '#163D30',
         },
-        status: {
-          emerald: "#10B981",
-          amber: "#F59E0B",
-          crimson: "#EF4444",
+        emeraldBrand: {
+          DEFAULT: '#169C69',
+          dark: '#0F7A52',
+          mint: '#10B981',
+          jade: '#0D9488',
+          lime: '#84CC16',
+          sage: '#E2F3EA',
         },
-
-        // Legacy Flat Tokens (Preserved so zero existing classes break)
-        skyPulse: "#1B6B48",
-        deepSky: "#114B32",
-        pureWhite: "#FFFFFF",
-        frostWhite: "#F8FAFC",
-        frostCanvas: "#F8FAFC",
-        obsidian: "#0F172A",
-        obsidianBlack: "#0F172A",
-        slateGray: "#475569",
-        slateText: "#475569",
-        cloudLine: "#E2E8F0",
-        emeraldGreen: "#10B981",
-        amberGold: "#F59E0B",
-        crimsonRed: "#EF4444",
       },
     },
   },
   plugins: [],
 };
+
+export default config;

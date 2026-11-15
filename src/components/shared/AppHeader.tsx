@@ -5,11 +5,11 @@ import { Search, Mail, Bell, Sun, Moon, Menu } from 'lucide-react';
 import { useTheme } from '@/components/shared/ThemeContext';
 import { useMode } from '@/components/shared/ModeContext';
 
-interface AppHeaderProps {
+export interface AppHeaderProps {
   onToggleSidebar?: () => void;
 }
 
-export function AppHeader({ onToggleSidebar }: AppHeaderProps) {
+export function AppHeader({ onToggleSidebar }: AppHeaderProps = {}) {
   const { theme, toggleTheme } = useTheme();
   const modeContext = useMode() as any;
   const isExpert = Boolean(
@@ -39,7 +39,7 @@ export function AppHeader({ onToggleSidebar }: AppHeaderProps) {
           />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search campaigns..."
             className="w-full pl-8 sm:pl-9 pr-3 sm:pr-10 py-1.5 sm:py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-[#1B6B48]"
           />
           <span className="hidden sm:inline absolute right-2.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-500">
@@ -97,3 +97,5 @@ export function AppHeader({ onToggleSidebar }: AppHeaderProps) {
     </header>
   );
 }
+
+export default AppHeader;
