@@ -2,15 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 :root {
-  --brand-pulse: #38BDF8;
-  --brand-deep: #0284C7;
-  --obsidian: #0F172A;
-  --slate-text: #64748B;
-  --cloud-line: #E8EDF5;
-  --frost: #F8FAFC;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* 7-Tier Multi-Tone Green Palette */
+  --green-forest-deep: #07130F;
+  /* Deepest dark canvas */
+  --green-pine-surface: #0D241C;
+  /* Dark mode cards & sidebars */
+  --green-spruce-border: #163D30;
+  /* Dark mode borders */
+  --green-emerald: #169C69;
+  /* Primary brand action */
+  --green-emerald-hover: #0F7A52;
+  /* Hover / active states */
+  --green-mint: #10B981;
+  /* Highlights & active indicators */
+  --green-jade: #0D9488;
+  /* Secondary charts & comparison bars */
+  --green-lime: #84CC16;
+  /* High-growth KPI badges */
+  --green-sage-canvas: #EFF7F3;
+  /* Soft green-tinted page background */
+  --green-sage-card: #E2F3EA;
+  /* Highlighted card & alert tint */
+  --green-sage-border: #B7DEC9;
+  /* Crisp botanical card border */
+  --green-ink: #0B1F17;
+  /* High-contrast dark green-black text */
 }
 
 * {
@@ -18,87 +38,117 @@
 }
 
 html {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-
-body {
-  background: #F1F5F9;
+  font-family: var(--font-sans);
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth scrollbar */
+body {
+  background: var(--green-sage-canvas);
+  color: var(--green-ink);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.dark body {
+  background: var(--green-forest-deep);
+  color: #ECFDF5;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Smooth Botanical Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #E2F3EA;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #07130F;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #6EE7B7;
   border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #38BDF8;
+  background: #169C69;
 }
 
-/* Input focus rings */
+/* Input Focus Rings (Emerald + Mint Glow) */
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  border-color: #169C69 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
 }
 
-/* Range slider styling */
-input[type="range"] {
+/* Range Slider Styling (Emerald & Jade) */
+input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
-  background: #E2E8F0;
+  height: 6px;
+  background: linear-gradient(to right, #169C69, #34D399);
   border-radius: 99px;
   outline: none;
 }
 
-input[type="range"]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
-  background: #0284C7;
+  width: 20px;
+  height: 20px;
+  background: #0F7A52;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.4);
-  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(15, 122, 82, 0.45);
+  border: 2.5px solid #ECFDF5;
 }
 
-input[type="range"]:disabled::-webkit-slider-thumb {
+input[type='range']:disabled::-webkit-slider-thumb {
   background: #94A3B8;
 }
 
-/* Transitions */
-.nav-link {
-  transition: all 0.15s ease;
-}
-
-/* Auth page gradient */
+/* Multi-Green Reusable Gradients & Surfaces */
 .auth-gradient {
-  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #0284C7 100%);
+  background: linear-gradient(135deg, #07130F 0%, #0E2E23 50%, #169C69 100%);
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+.green-hero-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #E6F5EE 65%, #D1FAE5 100%);
+  border: 1px solid #B7DEC9;
+}
+
+.dark .green-hero-card {
+  background: linear-gradient(135deg, #0D241C 0%, #091B15 70%, #06281E 100%);
+  border: 1px solid #163D30;
+}
+
+.green-cta-gradient {
+  background: linear-gradient(135deg, #0F7A52 0%, #169C69 50%, #10B981 100%);
+}
+
+.green-cta-gradient:hover {
+  background: linear-gradient(135deg, #0B5E3F 0%, #0F7A52 50%, #169C69 100%);
+}
 
 /* Utilities */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -107,6 +157,6 @@ input[type="range"]:disabled::-webkit-slider-thumb {
 
 @layer base {
   body {
-    @apply bg-frostWhite text-obsidianBlack antialiased;
+    @apply bg-[#EFF7F3] text-[#0B1F17] antialiased;
   }
 }
