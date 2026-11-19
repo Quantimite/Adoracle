@@ -2,26 +2,30 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import {
   LayoutGrid,
-  Compass,
-  Layers,
+  Network,
+  Rocket,
   SlidersHorizontal,
+  Share2,
   BrainCircuit,
   SearchCode,
   Settings,
   HelpCircle,
+  UserCircle,
   LogOut,
   X,
 } from 'lucide-react';
 import { AdoracleLogo } from '@/components/shared/AdoracleLogo';
 
-const navItems = [
+const navItems: { href: string; label: string; icon: React.ElementType; badge?: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
-  { href: '/selector', label: 'Platform Selector', icon: Compass },
-  { href: '/studio', label: 'Campaign Studio', icon: Layers, badge: '4' },
+  { href: '/platforms', label: 'Platforms', icon: Network },
+  { href: '/builder', label: 'Campaign Builder', icon: Rocket },
   { href: '/campaigns', label: 'Campaigns', icon: SlidersHorizontal },
+  { href: '/posts', label: 'Social Posts', icon: Share2 },
   { href: '/intelligence', label: 'AI Intelligence', icon: BrainCircuit },
   { href: '/seo', label: 'SEO & Safety', icon: SearchCode },
 ];
@@ -33,7 +37,6 @@ export interface AppSidebarProps {
 
 export function AppSidebar({ isOpen = false, onClose }: AppSidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
 
   const handleLinkClick = () => {
     if (onClose) onClose();
@@ -122,6 +125,18 @@ export function AppSidebar({ isOpen = false, onClose }: AppSidebarProps) {
             </p>
             <div className="space-y-1">
               <Link
+                href="/profile"
+                onClick={handleLinkClick}
+                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  pathname === '/profile'
+                    ? 'text-slate-900 dark:text-white bg-white dark:bg-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-900/50'
+                }`}
+              >
+                <UserCircle size={16} className="text-slate-400" />
+                <span>My Profile</span>
+              </Link>
+              <Link
                 href="/settings"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-900/50 transition-all"
@@ -141,7 +156,7 @@ export function AppSidebar({ isOpen = false, onClose }: AppSidebarProps) {
                 type="button"
                 onClick={() => {
                   handleLinkClick();
-                  router.push('/login');
+                  signOut({ callbackUrl: '/login' });
                 }}
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50/70 dark:hover:bg-slate-900/50 transition-all"
               >

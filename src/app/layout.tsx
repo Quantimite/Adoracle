@@ -1,9 +1,9 @@
 // src/app/layout.tsx
-import './globals.css';
+import '@/frontend/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
-import { ModeProvider } from '@/components/shared/ModeContext';
-import { ThemeProvider } from '@/components/shared/ThemeContext';
+import { ModeProvider } from '@/frontend/context/ModeContext';
+import { ThemeProvider } from '@/frontend/context/ThemeContext';
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -51,7 +51,7 @@ export default function RootLayout({
       className={`${plusJakarta.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-[#F4F9F6] dark:bg-[#08110E] text-[#0D1F18] dark:text-[#ECFDF5] font-sans text-[15px] sm:text-base leading-relaxed antialiased selection:bg-[#169C69] selection:text-white transition-colors duration-300">
+      <body className="bg-[#F2F7FF] dark:bg-[#08110E] text-[#0D1F18] dark:text-[#EFF6FF] font-sans text-[15px] sm:text-base leading-relaxed antialiased selection:bg-[#2A6FE0] selection:text-white transition-colors duration-300">
         <ThemeProvider>
           <ModeProvider>{children}</ModeProvider>
         </ThemeProvider>

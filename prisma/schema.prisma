@@ -20,6 +20,10 @@ model User {
   image         String?
   jobTitle      String?           @default("Growth & Performance Lead")
   currency      String            @default("USD ($)")
+  company       String?
+  timezone      String?
+  phone         String?
+  notificationPrefs Json?
   plainLanguage Boolean           @default(true)
   linkGuard     Boolean           @default(true)
   accounts      Account[]
@@ -83,6 +87,119 @@ model Workspace {
   lessons         LearningLesson[]
   seoAudits       SeoAudit[]
   urlAudits       UrlAudit[]
+  posts           SocialPost[]
+  billingEmail    String?
+  taxId           String?
+  invites         WorkspaceInvite[]
+  consents        ConsentRecord[]
+  media           MediaAsset[]
+  rules           AutomationRule[]
+}
+
+model WorkspaceInvite {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  role        String    @default("VIEWER")
+  status      String    @default("PENDING")
+  invitedBy   String?
+  createdAt   DateTime  @default(now())
+
+  @@unique([workspaceId, email])
+}
+
+// What the user agreed to when connecting an account (kept for transparency + compliance)
+model ConsentRecord {
+  id               String    @id @default(uuid())
+  workspaceId      String
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId           String
+  provider         String
+  features         String[]
+  scopes           String?   @db.Text
+  agreementVersion String
+  ipAddress        String?
+  userAgent        String?   @db.Text
+  grantedAt        DateTime  @default(now())
+  revokedAt        DateTime?
+}
+
+model MediaAsset {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  url         String    @db.Text
+  pathname    String    @db.Text
+  name        String
+  contentType String
+  size        Int       @default(0)
+  kind        String    @default("IMAGE") // IMAGE | VIDEO
+  createdAt   DateTime  @default(now())
+}
+
+model AutomationRule {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  platform    String    @default("ALL")
+  metric      String    // CPA, ROAS, CTR, FREQUENCY, SPEND
+  operator    String    // GT, LT
+  value       Float
+  minSpend    Float     @default(0)
+  action      String    // PAUSE, SCALE_UP, SCALE_DOWN, NOTIFY
+  actionValue Float?
+  enabled     Boolean   @default(true)
+  lastRunAt   DateTime?
+  lastResult  String?   @db.Text
+  createdAt   DateTime  @default(now())
+}
+
+model AdSet {
+  id           String   @id @default(uuid())
+  campaignId   String
+  campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name         String
+  status       String   @default("PAUSED") // ACTIVE | PAUSED
+  budget       Float?
+  budgetType   String   @default("daily")
+  startTime    DateTime?
+  endTime      DateTime?
+  audience     String?  @db.Text
+  placements   String?  @db.Text
+  bidStrategy  String?
+  optimization String?
+  externalId   String?
+  ads          Ad[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Ad {
+  id             String   @id @default(uuid())
+  adSetId        String
+  adSet          AdSet    @relation(fields: [adSetId], references: [id], onDelete: Cascade)
+  campaignId     String
+  name           String
+  status         String   @default("PAUSED") // ACTIVE | PAUSED
+  format         String?
+  primaryText    String   @db.Text
+  headline       String
+  description    String?
+  cta            String   @default("Learn more")
+  destinationUrl String   @db.Text
+  mediaUrl       String?  @db.Text
+  mediaType      String?
+  sourcePostId   String?
+  sourcePostUrl  String?  @db.Text
+  externalId     String?
+  impressions    Int      @default(0)
+  clicks         Int      @default(0)
+  spend          Float    @default(0)
+  conversions    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model IntegrationToken {
@@ -95,6 +212,8 @@ model IntegrationToken {
   accessToken  String    @db.Text // Encrypted via AES-256
   refreshToken String?   @db.Text // Encrypted via AES-256
   status       String    @default("CONNECTED")
+  scopes       String?   @db.Text
+  meta         Json?     // e.g. { accounts: [...], pages: [...], pixelId: "..." } (no secrets here)
   expiresAt    DateTime?
   connectedAt  DateTime  @default(now())
   lastSyncedAt DateTime  @default(now())
@@ -132,6 +251,11 @@ model Campaign {
   clicks             Int            @default(0)
   roas               Float          @default(0.0)
   aiOptimizing       Boolean        @default(true)
+  objective          String?
+  launchStatus       String         @default("LIVE") // DRAFT, QUEUED, PUSHED, FAILED, LIVE
+  launchMessage      String?        @db.Text
+  structure          Json?          // full Campaign > Ad set > Ad blueprint created in the builder
+  adSets             AdSet[]
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 
@@ -157,6 +281,8 @@ model SeoAudit {
   searchImpressions Int
   coreWebVitals     Boolean   // True if 3/3 met
   brokenLinksCount  Int       // Triggers Crimson Red banner if > 0
+  url               String?
+  details           Json?
   auditedAt         DateTime  @default(now())
 }
 
@@ -169,7 +295,28 @@ model UrlAudit {
   isHealthy   Boolean
   redirectUrl String?
   responseMs  Int
+  source      String?   // e.g. 'AD:<id>' or 'MANUAL'
+  chain       Json?
   checkedAt   DateTime  @default(now())
+}
+
+model SocialPost {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  caption     String    @db.Text
+  mediaUrl    String?
+  link        String?
+  platforms   String[]  // META, TIKTOK, YOUTUBE, LINKEDIN
+  status      String    @default("DRAFT") // DRAFT, SCHEDULED, PUBLISHED, FAILED
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  postType    String    @default("POST") // POST | REEL | STORY
+  mediaType   String?   // IMAGE | VIDEO
+  alsoInstagram Boolean @default(false)
+  results     Json?     // per-platform result messages
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 enum Platform {

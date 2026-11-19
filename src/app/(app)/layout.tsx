@@ -1,21 +1,37 @@
-'use client';
+import React from 'react';
+import { redirect } from 'next/navigation';
+import { auth } from '@/backend/auth';
+import { db } from '@/backend/db/client';
+import { AppShell } from '@/frontend/components/layout/AppShell';
 
-import React, { useState } from 'react';
-import { AppSidebar } from '@/components/shared/AppSidebar';
-import { AppHeader } from '@/components/shared/AppHeader';
+export const dynamic = 'force-dynamic';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+// Server-side gate: nobody reaches the app pages without a valid session.
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+  if (!session?.user?.id) redirect('/login');
+
+  // Read the freshest name/photo from the database so profile edits show immediately
+  let name = session.user.name || '';
+  let email = session.user.email || '';
+  let image = session.user.image || null;
+  try {
+    const u = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { name: true, email: true, image: true },
+    });
+    if (u) {
+      name = u.name || name;
+      email = u.email || email;
+      image = u.image ?? image;
+    }
+  } catch {
+    /* fall back to the session values */
+  }
 
   return (
-    <div className="flex min-h-screen bg-[#F5F7F6] dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors overflow-x-hidden">
-      <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col w-full min-w-0 lg:ml-64 transition-[margin]">
-        <AppHeader onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
-        <main className="flex-1 px-3 sm:px-6 lg:px-7 py-4 sm:py-6 overflow-y-auto w-full min-w-0">
-          <div className="max-w-6xl mx-auto w-full min-w-0">{children}</div>
-        </main>
-      </div>
-    </div>
+    <AppShell user={{ id: session.user.id, name: name || email.split('@')[0] || 'User', email, image }}>
+      {children}
+    </AppShell>
   );
 }
