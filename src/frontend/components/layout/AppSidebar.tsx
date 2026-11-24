@@ -91,20 +91,19 @@ export function AppSidebar({ isOpen = false, onClose }: AppSidebarProps) {
                     key={item.href}
                     href={item.href}
                     onClick={handleLinkClick}
-                    className={`relative flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`group relative flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                       isActive
                         ? 'text-slate-900 dark:text-white bg-white dark:bg-slate-900 shadow-sm'
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-900/50'
                     }`}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#1E57D0]" />
+                      <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-[#36BAFC] to-[#1E57D0]" />
                     )}
                     <div className="flex items-center gap-3">
-                      <Icon
-                        size={16}
-                        className={isActive ? 'text-[#1E57D0]' : 'text-slate-400'}
-                      />
+                      <span className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isActive ? 'bg-gradient-to-br from-[#36BAFC] to-[#1E57D0] text-white shadow-md shadow-blue-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:text-blue-600'}`}>
+                        <Icon size={15} />
+                      </span>
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (

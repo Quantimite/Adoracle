@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Bell, CreditCard, Download, Loader2, Plug, ShieldCheck, SlidersHorizontal, Trash2, Users, UserCircle, CheckCircle2, AlertTriangle, Building2, Mail } from 'lucide-react';
+import { Bell, CreditCard, Download, Loader2, Plug, ShieldCheck, SlidersHorizontal, Trash2, Users, UserCircle, CheckCircle2, AlertTriangle, Building2, Mail, Wrench } from 'lucide-react';
 import { ConnectionsPanel } from '@/frontend/components/connections/ConnectionsPanel';
+import { PlatformSetupGuide } from '@/frontend/components/connections/PlatformSetupGuide';
+import { useConnections } from '@/frontend/hooks/useConnections';
 import { useTheme } from '@/frontend/context/ThemeContext';
 
-type Section = 'preferences' | 'workspace' | 'connections' | 'notifications' | 'billing' | 'privacy';
+type Section = 'preferences' | 'workspace' | 'connections' | 'setup' | 'notifications' | 'billing' | 'privacy';
 
 interface SettingsData {
   role: 'OWNER' | 'ADMIN' | 'VIEWER';
@@ -24,6 +26,7 @@ interface SettingsData {
 
 const NAV: { id: Section; label: string; icon: React.ElementType }[] = [
   { id: 'connections', label: 'Connected accounts', icon: Plug },
+  { id: 'setup', label: 'Platform setup (admin)', icon: Wrench },
   { id: 'preferences', label: 'Preferences', icon: SlidersHorizontal },
   { id: 'workspace', label: 'Workspace & team', icon: Users },
   { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -67,6 +70,7 @@ function SettingsContent() {
   const router = useRouter();
   const params = useSearchParams();
   const { theme, toggleTheme } = useTheme();
+  const { isAdmin } = useConnections();
   const [section, setSection] = useState<Section>('connections');
   const [data, setData] = useState<SettingsData | null>(null);
   const [failed, setFailed] = useState(false);
@@ -112,7 +116,7 @@ function SettingsContent() {
 
       <div className="grid lg:grid-cols-4 gap-5">
         <nav className="lg:col-span-1 flex lg:flex-col gap-1.5 overflow-x-auto pb-1" aria-label="Settings sections">
-          {NAV.map((n) => {
+          {NAV.filter((n) => n.id !== 'setup' || isAdmin).map((n) => {
             const Icon = n.icon;
             return (
               <button key={n.id} type="button" onClick={() => { setSection(n.id); router.replace(`/settings?section=${n.id}`, { scroll: false }); }} className={`shrink-0 flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-left ${section === n.id ? 'bg-[#153E9E] text-white' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-[#1E57D0]'}`}>
@@ -124,9 +128,10 @@ function SettingsContent() {
 
         <div className="lg:col-span-3 space-y-4">
           {section === 'connections' && <div className={card}><ConnectionsPanel /></div>}
+          {section === 'setup' && isAdmin && <div className={card}><PlatformSetupGuide /></div>}
 
-          {section !== 'connections' && failed && <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-sm text-amber-900 font-semibold">Could not load your settings. Check that the database is connected.</div>}
-          {section !== 'connections' && !failed && !data && <p className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Loading…</p>}
+          {section !== 'connections' && section !== 'setup' && failed && <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-sm text-amber-900 font-semibold">Could not load your settings. Check that the database is connected.</div>}
+          {section !== 'connections' && section !== 'setup' && !failed && !data && <p className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Loading…</p>}
 
           {data && section === 'preferences' && (
             <div className={`${card} space-y-5`}>

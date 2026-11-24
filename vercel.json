@@ -1,7 +1,17 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
   "crons": [
-    { "path": "/api/cron/rules", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/publish", "schedule": "0 7 * * *" }
+    {
+      "path": "/api/cron/rules",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/publish",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/sync",
+      "schedule": "0 5 * * *"
+    }
   ]
 }

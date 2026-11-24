@@ -2,7 +2,6 @@
 // The "AI" brain: turns campaign numbers into plain-language insights and safe one-click actions,
 // runs automation rules, and writes ad copy (with Claude when ANTHROPIC_API_KEY is set, templates otherwise).
 import { db } from '@/backend/db/client';
-import { initialCampaigns } from '@/shared/demoData';
 import { SPECS, PlatformId } from '@/shared/adspec';
 import { syncCampaignStatus } from '@/backend/services/adManagement';
 
@@ -35,9 +34,7 @@ export const TARGET_CPA = 30;
 
 export async function loadCampaignRows(workspaceId: string): Promise<CampaignRow[]> {
   const rows = await db.campaign.findMany({ where: { workspaceId }, orderBy: { createdAt: 'desc' } });
-  const real: CampaignRow[] = rows.map((c: any) => ({ id: c.id, platform: c.platform, name: c.name, status: c.status, dailyBudget: c.dailyBudget, totalSpend: c.totalSpend, customersWon: c.customersWon, costPerCustomer: c.costPerCustomer, roas: c.roas || 0, demo: false }));
-  if (real.length) return real;
-  return initialCampaigns.map((c) => ({ id: c.id, platform: c.platform, name: c.name, status: c.status, dailyBudget: c.dailyBudget, totalSpend: c.totalSpend, customersWon: c.customersWon, costPerCustomer: c.costPerCustomer, roas: c.roas || 0, demo: true }));
+  return rows.map((c: any) => ({ id: c.id, platform: c.platform, name: c.name, status: c.status, dailyBudget: c.dailyBudget, totalSpend: c.totalSpend, customersWon: c.customersWon, costPerCustomer: c.costPerCustomer, roas: c.roas || 0, demo: false }));
 }
 
 export function buildInsights(rows: CampaignRow[], connectedPlatforms: string[]): Insight[] {

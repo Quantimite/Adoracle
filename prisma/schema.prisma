@@ -94,6 +94,9 @@ model Workspace {
   consents        ConsentRecord[]
   media           MediaAsset[]
   rules           AutomationRule[]
+  metrics         DailyMetric[]
+  breakdowns      BreakdownMetric[]
+  accountStats    AccountStat[]
 }
 
 model WorkspaceInvite {
@@ -332,4 +335,58 @@ enum CampaignStatus {
   LEARNING
   ERROR
   PAUSED
+}
+// ==========================================
+// REAL ANALYTICS (synced from the ad platforms)
+// ==========================================
+
+// One row per platform campaign per day
+model DailyMetric {
+  id                 String    @id @default(uuid())
+  workspaceId        String
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platform           String    // META | TIKTOK | GOOGLE | YOUTUBE | LINKEDIN
+  externalCampaignId String
+  campaignName       String?
+  date               DateTime  @db.Date
+  spend              Float     @default(0)
+  impressions        Int       @default(0)
+  reach              Int       @default(0)
+  clicks             Int       @default(0)
+  conversions        Float     @default(0)
+  conversionValue    Float     @default(0)
+  engagements        Int       @default(0)
+
+  @@unique([workspaceId, platform, externalCampaignId, date])
+  @@index([workspaceId, date])
+}
+
+// Last-30-day totals split by age, gender, placement, device, region ...
+model BreakdownMetric {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platform    String
+  dimension   String
+  key         String
+  spend       Float     @default(0)
+  impressions Int       @default(0)
+  clicks      Int       @default(0)
+  conversions Float     @default(0)
+  syncedAt    DateTime  @default(now())
+
+  @@unique([workspaceId, platform, dimension, key])
+}
+
+// Follower counts of connected pages / accounts
+model AccountStat {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platform    String
+  label       String
+  followers   Int       @default(0)
+  date        DateTime  @db.Date
+
+  @@unique([workspaceId, platform, label, date])
 }

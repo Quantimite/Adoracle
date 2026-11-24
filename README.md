@@ -64,7 +64,14 @@ You (the site owner) register one developer app per platform. Redirect URL for e
 
 Platforms require app review before accounts outside your own can connect.
 
-## 4. What is real vs. sample
-* **Real:** login, profile, settings, team invites, connections + verification + consent, media upload, existing-post picker (Facebook, Instagram, YouTube), campaign builder, saved Campaign › Ad set › Ad rows with edit / pause / duplicate / delete / bulk edit, Meta + TikTok campaign creation (created **paused**) and campaign pause/resume sync, Facebook Page + Instagram posting (photos, videos, Reels), website audit, link checker + Link Guard auto-pause, insights, one-click actions, automation rules, ad copy writer, website scan.
-* **Sample data:** dashboard and platform metrics until live reporting sync is added.
-* **Saved as drafts:** Google, YouTube and LinkedIn campaign pushes; TikTok, YouTube and LinkedIn posts; ad set / ad level pushes to platforms.
+## 3b. Real data (analytics) and publishing
+* **Sync:** after a user connects, Adoracle imports campaigns and 30 days of results into the database (`DailyMetric`, `BreakdownMetric`, `AccountStat`, `Campaign`). Meta (campaigns, daily results, age / gender / placement / device / region breakdowns, Facebook + Instagram followers), TikTok (campaigns, daily results, age / gender) and Google Ads + YouTube campaigns (campaigns, daily results, device / network / hour) are supported. LinkedIn reporting is not enabled yet.
+* **When it runs:** right after connecting, when you press **Sync now**, automatically when the dashboard opens with data older than 30 minutes, and daily via `/api/cron/sync`.
+* **Every screen reads these tables**: Dashboard, Platforms, Campaigns, AI Intelligence. If nothing is connected they show empty states, never invented numbers. "Reach" is the sum of each day's reach, so it can overcount people who were reached on several days.
+* **Publishing to Meta:** the builder creates Campaign → Ad set (audience, placements, budget, schedule, goal) → Ad creative (image, video, or an existing Facebook post) → Ad, all PAUSED, and switches them on only if you chose Active. Each step is reported. It needs a Facebook Page on the connected account and, for sales/leads, a Meta Pixel on the ad account (otherwise it optimizes for link clicks and tells you).
+
+## 4. What is real
+* **Real and live:** login, profile, settings, team invites, connections + verification + consent, media upload, existing-post picker, Facebook Page + Instagram posting (photos, videos, Reels), full Meta ad publishing, TikTok campaign creation, campaign / ad set / ad management (edit, pause, duplicate, delete, bulk edit, status sync to Meta), real analytics sync (Meta, TikTok, Google/YouTube campaigns), website audit, link checker + Link Guard, insights, one-click actions, automation rules, ad copy writer, website scan.
+* **Estimates:** the AI Platform Planner (`/selector`) budget split and cost ranges are heuristics, labelled as estimates.
+* **Saved as drafts:** Google, YouTube and LinkedIn campaign publishing; TikTok ad group and ad publishing; TikTok, YouTube and LinkedIn posts.
+* **Untested against live accounts:** all platform API calls were written from the official API shapes but could not be run here. Test with a small budget first. Platform API versions change; adjust `META_GRAPH_VERSION`, `GOOGLE_ADS_API_VERSION` if a call is rejected.
