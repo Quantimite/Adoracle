@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/backend/db/client';
 import { getCtx, unauthorized, forbidden, canEdit } from '@/backend/auth/session';
-import { Level, cleanChanges, duplicate, loadCampaign, syncCampaignStatus } from '@/backend/services/adManagement';
+import { Level, cleanChanges, duplicate, loadCampaign, syncCampaignStatus, syncItemStatus } from '@/backend/services/adManagement';
 
 type P = { params: { id: string } };
 const isLevel = (v: any): v is Level => ['campaign', 'adset', 'ad'].includes(v);
@@ -47,8 +47,16 @@ export async function PATCH(req: NextRequest, { params }: P) {
   } else if (b.level === 'adset') {
     await db.adSet.updateMany({ where: { id: { in: ids }, campaignId: campaign.id }, data });
     if (data.status === 'PAUSED') await db.ad.updateMany({ where: { adSetId: { in: ids } }, data: { status: 'PAUSED' } });
+    if (data.status) {
+      const items = await db.adSet.findMany({ where: { id: { in: ids }, campaignId: campaign.id }, select: { externalId: true } });
+      note = await syncItemStatus(ctx.workspaceId, campaign.platform, items.map((i: any) => i.externalId), data.status);
+    }
   } else {
     await db.ad.updateMany({ where: { id: { in: ids }, campaignId: campaign.id }, data });
+    if (data.status) {
+      const items = await db.ad.findMany({ where: { id: { in: ids }, campaignId: campaign.id }, select: { externalId: true } });
+      note = await syncItemStatus(ctx.workspaceId, campaign.platform, items.map((i: any) => i.externalId), data.status);
+    }
   }
   return NextResponse.json({ success: true, note, campaign: await loadCampaign(ctx.workspaceId, params.id) });
 }

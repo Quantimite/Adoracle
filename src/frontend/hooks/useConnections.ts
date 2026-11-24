@@ -36,6 +36,7 @@ export interface ConnectionInfo {
 export function useConnections() {
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
   const [canManage, setCanManage] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
 
@@ -46,6 +47,7 @@ export function useConnections() {
       const data = await res.json();
       setConnections(data.connections || []);
       setCanManage(data.canManage !== false);
+      setIsAdmin(!!data.isAdmin);
       setFailed(false);
     } catch {
       setFailed(true);
@@ -67,7 +69,7 @@ export function useConnections() {
     [refresh]
   );
 
-  return { connections, loading, failed, canManage, refresh, verify };
+  return { connections, loading, failed, canManage, isAdmin, refresh, verify };
 }
 
 /** Is this platform connected? (YouTube rides on the Google connection.) */

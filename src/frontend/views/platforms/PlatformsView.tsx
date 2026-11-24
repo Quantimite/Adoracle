@@ -11,6 +11,7 @@ import { PlatformBadge } from '@/frontend/components/common/PlatformBadge';
 import { ALL_PLATFORMS, PlatformId, SPECS } from '@/shared/adspec';
 import { PlatformBlueprint } from '@/shared/blueprint';
 import { useConnections, isPlatformConnected } from '@/frontend/hooks/useConnections';
+import { useAnalytics, Analytics } from '@/frontend/hooks/useAnalytics';
 import { AnimatedNumber } from '@/frontend/components/dashboard/ReachOverview';
 
 interface ApiCampaign {
@@ -37,45 +38,6 @@ const MANAGER_URL: Record<PlatformId, string> = {
   LINKEDIN: 'https://www.linkedin.com/campaignmanager/',
 };
 
-// Sample numbers shown until the platform is connected
-const DEMO: Record<PlatformId, { spend: number; reach: number; clicks: number; conv: number; roas: number }> = {
-  META: { spend: 1420, reach: 246000, clicks: 5100, conv: 66, roas: 5.4 },
-  TIKTOK: { spend: 680, reach: 242000, clicks: 3900, conv: 26, roas: 4.2 },
-  GOOGLE: { spend: 1180, reach: 134000, clicks: 6200, conv: 64, roas: 6.1 },
-  YOUTUBE: { spend: 441, reach: 115000, clicks: 1700, conv: 13, roas: 3.9 },
-  LINKEDIN: { spend: 520, reach: 33000, clicks: 800, conv: 9, roas: 2.7 },
-};
-
-const BUCKETS: Record<string, string[]> = {
-  Age: ['18–24', '25–34', '35–44', '45–54', '55+'],
-  Gender: ['Women', 'Men', 'Unknown'],
-  Device: ['Mobile', 'Desktop', 'Tablet'],
-  'Device OS': ['iOS', 'Android', 'Desktop'],
-  Region: ['Western', 'Central', 'Southern', 'Northern', 'Eastern'],
-  'Country / region': ['Sri Lanka', 'India', 'UAE', 'UK', 'USA'],
-  Location: ['Colombo', 'Kandy', 'Galle', 'Jaffna', 'Other'],
-  Network: ['Google Search', 'Search partners', 'Display'],
-  'Day of week': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  'Hour of day': ['00–06', '06–10', '10–14', '14–18', '18–22', '22–24'],
-  'Search term': ['brand terms', 'buy online', 'best price', 'near me', 'reviews'],
-  'Job title': ['Founder / Owner', 'Manager', 'Director', 'Specialist', 'Student'],
-  Industry: ['Software', 'Retail', 'Marketing', 'Finance', 'Education'],
-  'Company size': ['1–10', '11–50', '51–200', '201–1000', '1000+'],
-  Seniority: ['Owner', 'Director', 'Senior', 'Entry', 'Training'],
-};
-
-function breakdownRows(label: string, platform: PlatformId) {
-  const names = label === 'Placement' ? SPECS[platform].placements.map((p) => p.label).slice(0, 6) : BUCKETS[label] || ['Group A', 'Group B', 'Group C'];
-  // deterministic pseudo-data so the screen doesn't flicker between renders
-  let seed = (platform.charCodeAt(0) * 31 + label.length * 17) % 97;
-  const raw = names.map((n, i) => {
-    seed = (seed * 37 + 11 + i * 7) % 101;
-    return { name: n, weight: 8 + (seed % 40), cpr: 12 + ((seed * 3) % 22) };
-  });
-  const total = raw.reduce((a, b) => a + b.weight, 0);
-  return raw.map((r) => ({ ...r, share: (r.weight / total) * 100 })).sort((a, b) => b.share - a.share);
-}
-
 const statusStyle: Record<string, string> = {
   ACTIVE: 'bg-blue-100 text-blue-800',
   LEARNING: 'bg-sky-100 text-sky-800',
@@ -90,6 +52,8 @@ function PlatformsContent() {
   const tab: PlatformId | 'ALL' = (ALL_PLATFORMS as string[]).includes(raw) ? (raw as PlatformId) : 'ALL';
 
   const { connections } = useConnections();
+  const { data: all } = useAnalytics(7);
+  const { data: one, syncing, sync } = useAnalytics(7, tab === 'ALL' ? 'ALL' : tab);
   const [campaigns, setCampaigns] = useState<ApiCampaign[]>([]);
   const [loadingC, setLoadingC] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -194,7 +158,7 @@ function PlatformsContent() {
             const spec = SPECS[p];
             const connected = isPlatformConnected(connections, p);
             const list = byPlatform[p] || [];
-            const d = DEMO[p];
+            const d = all?.byPlatform.find((x) => x.platform === p);
             return (
               <motion.div
                 key={p}
@@ -217,12 +181,12 @@ function PlatformsContent() {
                 <div className="grid grid-cols-3 gap-2 mt-4 text-center">
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-950 p-2">
                     <p className="text-sm font-extrabold tabular-nums text-slate-900 dark:text-white">
-                      <AnimatedNumber value={d.spend} prefix="$" compact={false} />
+                      <AnimatedNumber value={d?.spend || 0} prefix="$" compact={false} />
                     </p>
                     <p className="text-[10px] text-slate-500">Spend (7d)</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-950 p-2">
-                    <p className="text-sm font-extrabold tabular-nums text-slate-900 dark:text-white">{d.roas}×</p>
+                    <p className="text-sm font-extrabold tabular-nums text-slate-900 dark:text-white">{d?.roas ? `${d.roas.toFixed(1)}×` : '—'}</p>
                     <p className="text-[10px] text-slate-500">ROAS</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-950 p-2">
@@ -269,6 +233,9 @@ function PlatformsContent() {
           setBreakdown={setBreakdown}
           busyId={busyId}
           toggleStatus={toggleStatus}
+          analytics={one}
+          syncing={syncing}
+          onSync={() => sync(true)}
         />
       )}
     </motion.div>
@@ -286,11 +253,14 @@ function PlatformDetail(props: {
   setBreakdown: (b: string) => void;
   busyId: string | null;
   toggleStatus: (c: ApiCampaign) => void;
+  analytics: Analytics | null;
+  syncing: boolean;
+  onSync: () => void;
 }) {
-  const { platform, connected, campaigns, loading, expanded, setExpanded, breakdown, setBreakdown, busyId, toggleStatus } = props;
+  const { platform, connected, campaigns, loading, expanded, setExpanded, breakdown, setBreakdown, busyId, toggleStatus, analytics, syncing, onSync } = props;
   const spec = SPECS[platform];
-  const d = DEMO[platform];
-  const rows = breakdownRows(breakdown || spec.breakdowns[0], platform);
+  const d = analytics?.totals;
+  const rows = (analytics?.breakdowns[breakdown || spec.breakdowns[0]] || []).slice(0, 8);
   const card = 'rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800';
 
   return (
@@ -318,6 +288,9 @@ function PlatformDetail(props: {
           <Link href={`/posts?platform=${platform}`} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-[#1E57D0] transition-colors">
             <Share2 size={14} /> Create post
           </Link>
+          {connected && (
+            <button type="button" disabled={syncing} onClick={onSync} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition-colors cursor-pointer disabled:opacity-60">{syncing ? 'Syncing…' : 'Sync now'}</button>
+          )}
           <a href={MANAGER_URL[platform]} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-[#1E57D0] transition-colors">
             <ExternalLink size={14} /> Open {spec.managerName}
           </a>
@@ -326,17 +299,17 @@ function PlatformDetail(props: {
 
       {!connected && (
         <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
-          Numbers below are sample data until you connect your {spec.short} account.
+          Connect your {spec.short} account to see real results here.
         </p>
       )}
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { l: 'Spend (7d)', v: d.spend, prefix: '$', compact: false },
-          { l: 'Reach', v: d.reach, compact: true },
-          { l: 'Clicks', v: d.clicks, compact: true },
-          { l: 'Conversions', v: d.conv, compact: false },
+          { l: 'Spend (7d)', v: d?.spend || 0, prefix: '$', compact: false },
+          { l: 'Impressions', v: d?.impressions || 0, compact: true },
+          { l: 'Clicks', v: d?.clicks || 0, compact: true },
+          { l: 'Results', v: d?.conversions || 0, compact: false },
         ].map((k) => (
           <div key={k.l} className={`${card} p-4`}>
             <p className="text-[11px] font-semibold text-slate-500">{k.l}</p>
@@ -347,7 +320,7 @@ function PlatformDetail(props: {
         ))}
         <div className={`${card} p-4 bg-gradient-to-br from-[#153E9E] to-[#2F7DEB] !border-transparent`}>
           <p className="text-[11px] font-semibold text-blue-100">ROAS</p>
-          <p className="text-2xl font-extrabold tabular-nums text-white mt-1">{d.roas}×</p>
+          <p className="text-2xl font-extrabold tabular-nums text-white mt-1">{d?.roas ? `${d.roas.toFixed(1)}×` : '—'}</p>
         </div>
       </div>
 
@@ -474,9 +447,10 @@ function PlatformDetail(props: {
           </div>
         </div>
         <div className="space-y-2.5">
+          {rows.length === 0 && <p className="text-xs text-slate-500">{connected ? 'No breakdown data for this view yet. Run Sync now after your ads have results.' : 'Connect this platform to see the breakdown.'}</p>}
           {rows.map((r, i) => (
-            <div key={`${breakdown}-${r.name}`} className="flex items-center gap-3 text-xs">
-              <span className="w-28 sm:w-36 truncate font-semibold text-slate-700 dark:text-slate-200">{r.name}</span>
+            <div key={`${breakdown}-${r.key}`} className="flex items-center gap-3 text-xs">
+              <span className="w-28 sm:w-36 truncate font-semibold text-slate-700 dark:text-slate-200">{r.key}</span>
               <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <motion.div
                   key={breakdown}
@@ -487,11 +461,11 @@ function PlatformDetail(props: {
                 />
               </div>
               <span className="w-12 text-right tabular-nums font-bold text-slate-900 dark:text-white">{r.share.toFixed(0)}%</span>
-              <span className="w-16 text-right tabular-nums text-slate-500 hidden sm:block">${r.cpr} CPA</span>
+              <span className="w-20 text-right tabular-nums text-slate-500 hidden sm:block">{r.conversions > 0 ? `$${(r.spend / r.conversions).toFixed(2)} CPA` : `$${r.spend.toFixed(0)} spent`}</span>
             </div>
           ))}
         </div>
-        <p className="text-[11px] text-slate-400 mt-3">Share of results by {breakdown.toLowerCase()}. {connected ? '' : 'Sample data until connected.'}</p>
+        <p className="text-[11px] text-slate-400 mt-3">Share of results by {breakdown.toLowerCase()} over the last 30 days, from your ad account.</p>
       </div>
     </div>
   );

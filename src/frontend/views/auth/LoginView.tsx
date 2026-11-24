@@ -1,7 +1,7 @@
 // src/app/login/page.tsx
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +17,6 @@ import {
   TrendingUp,
   Zap,
   User,
-  X,
 } from 'lucide-react';
 import { AdoracleLogo } from '@/frontend/components/common/AdoracleLogo';
 
@@ -44,18 +43,8 @@ function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState(
-    authErrorParam && authErrorParam !== 'Configuration'
-      ? AUTH_ERRORS[authErrorParam] || 'Authentication failed. Please try again.'
-      : ''
+    authErrorParam ? AUTH_ERRORS[authErrorParam] || 'Authentication failed. Please try again.' : ''
   );
-
-  useEffect(() => {
-    if (authErrorParam && typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('error');
-      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
-    }
-  }, [authErrorParam]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,16 +220,8 @@ function LoginContent() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-sm font-medium flex items-start justify-between gap-2">
-                <span>{error}</span>
-                <button
-                  type="button"
-                  onClick={() => setError('')}
-                  className="text-rose-600 hover:text-rose-800 p-0.5 rounded transition-colors"
-                  aria-label="Dismiss error"
-                >
-                  <X size={15} />
-                </button>
+              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-sm font-medium">
+                {error}
               </div>
             )}
 

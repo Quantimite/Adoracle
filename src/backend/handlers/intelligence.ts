@@ -25,7 +25,7 @@ export async function overview() {
   });
   const platforms = Array.from(plat.entries()).map(([platform, v]) => ({ platform, spend: Math.round(v.spend), customers: v.won, cpa: v.won ? Math.round((v.spend / v.won) * 100) / 100 : null, roas: v.n ? Math.round((v.roasSum / v.n) * 10) / 10 : 0 }));
 
-  return NextResponse.json({ demo: rows.every((r) => r.demo), score: healthScore(rows), targetCpa: TARGET_CPA, insights, platforms, rules, profile, canEdit: canEdit(ctx), aiCopy: !!process.env.ANTHROPIC_API_KEY });
+  return NextResponse.json({ demo: false, score: healthScore(rows), targetCpa: TARGET_CPA, insights, platforms, rules, profile, canEdit: canEdit(ctx), aiCopy: !!process.env.ANTHROPIC_API_KEY });
 }
 
 /** POST { campaignId, type } → apply an insight's one-click action. */

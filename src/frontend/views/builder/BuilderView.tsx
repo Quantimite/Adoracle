@@ -140,7 +140,7 @@ function BuilderContent() {
   const [step, setStep] = useState(0);
   const [error, setError] = useState('');
   const [launching, setLaunching] = useState(false);
-  const [results, setResults] = useState<{ platform: PlatformId; status: string; message: string }[] | null>(null);
+  const [results, setResults] = useState<{ platform: PlatformId; status: string; message: string; steps?: string[] }[] | null>(null);
   const { connections } = useConnections();
 
   const upd = (fn: (c: BuilderConfig) => void) =>
@@ -196,7 +196,7 @@ function BuilderContent() {
     setLaunching(true);
     setError('');
     try {
-      const res = await fetch('/api/campaigns/launch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config: cfg }) });
+      const res = await fetch('/api/campaigns/launch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config: { ...cfg, adSet: { ...cfg.adSet, startTime: new Date(cfg.adSet.startTime).toISOString(), endTime: cfg.adSet.endTime ? new Date(cfg.adSet.endTime).toISOString() : '' } } }) });
       const data = await res.json();
       if (!res.ok) setError(data.error || 'Launch failed.');
       else setResults(data.results);
@@ -223,6 +223,7 @@ function BuilderContent() {
                   {r.status === 'SKIPPED' && <span className="text-[11px] text-slate-500">Skipped</span>}
                 </p>
                 <p className="text-xs text-slate-500 mt-0.5">{r.message}</p>
+                {r.steps && r.steps.length > 0 && <ul className="mt-1.5 space-y-0.5">{r.steps.map((st) => <li key={st} className="text-[11px] text-slate-400">✓ {st}</li>)}</ul>}
               </div>
             </div>
           ))}

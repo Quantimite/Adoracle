@@ -3,12 +3,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ShieldCheck, ExternalLink, CheckCircle2, AlertTriangle, Loader2, Link2, Unplug, RefreshCw, X, ChevronDown, Lock, XCircle } from 'lucide-react';
-import { PlatformBadge } from '@/frontend/components/common/PlatformBadge';
-import { PlatformId } from '@/shared/adspec';
+import { BrandLogo } from '@/frontend/components/common/BrandLogo';
+import Link from 'next/link';
 import { AGREEMENT_POINTS, AGREEMENT_VERSION, FEATURES, FeatureId, scopesForFeatures } from '@/shared/connectFeatures';
 import { useConnections, ConnectionInfo } from '@/frontend/hooks/useConnections';
 
-const BADGE: Record<ConnectionInfo['key'], PlatformId> = { meta: 'META', google: 'GOOGLE', tiktok: 'TIKTOK', linkedin: 'LINKEDIN' };
+function Logos({ k, size }: { k: ConnectionInfo['key']; size: number }) {
+  if (k === 'meta') return <span className="relative inline-flex shrink-0" style={{ width: size * 1.45, height: size }}><BrandLogo id="FACEBOOK" size={size} /><span className="absolute" style={{ left: size * 0.45 }}><BrandLogo id="INSTAGRAM" size={size} /></span></span>;
+  if (k === 'google') return <span className="relative inline-flex shrink-0" style={{ width: size * 1.45, height: size }}><BrandLogo id="GOOGLE" size={size} /><span className="absolute" style={{ left: size * 0.45 }}><BrandLogo id="YOUTUBE" size={size} /></span></span>;
+  return <BrandLogo id={k === 'tiktok' ? 'TIKTOK' : 'LINKEDIN'} size={size} />;
+}
 const SHORT: Record<ConnectionInfo['key'], string> = { meta: 'Facebook / Instagram', google: 'Google & YouTube', tiktok: 'TikTok', linkedin: 'LinkedIn' };
 
 const MESSAGES: Record<string, string> = {
@@ -41,7 +45,7 @@ function ConnectModal({ conn, preselect, onClose }: { conn: ConnectionInfo; pres
       <div className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 p-5 sm:p-6 space-y-5 shadow-2xl">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <PlatformBadge id={BADGE[conn.key]} size={42} />
+            <Logos k={conn.key} size={42} />
             <div>
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Connect {SHORT[conn.key]}</h3>
               <p className="text-xs text-slate-500">You will sign in on {SHORT[conn.key]}’s own page. We never see your password.</p>
@@ -99,7 +103,8 @@ function ConnectModal({ conn, preselect, onClose }: { conn: ConnectionInfo; pres
 /* ------------------------------------------------------------------ */
 export function ConnectionsPanel() {
   const params = useSearchParams();
-  const { connections, loading, failed, canManage, refresh, verify } = useConnections();
+  const { connections, loading, failed, canManage, isAdmin, refresh, verify } = useConnections();
+  const [importMsg, setImportMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [modal, setModal] = useState<{ conn: ConnectionInfo; pre?: FeatureId[] } | null>(null);
   const autoVerified = useRef(false);
@@ -107,6 +112,16 @@ export function ConnectionsPanel() {
   const connectedKey = params.get('connected');
   const partialKey = params.get('partial');
   const errorKey = params.get('error');
+
+  // Right after connecting, import the real campaigns and results straight away.
+  useEffect(() => {
+    if (!connectedKey && !partialKey) return;
+    setImportMsg('Importing your campaigns and results…');
+    fetch('/api/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ force: true }) })
+      .then((r) => r.json())
+      .then((d) => setImportMsg((d.reports || []).map((x: any) => x.message).join(' ') || 'Done.'))
+      .catch(() => setImportMsg('Connected. Results will appear after the next refresh.'));
+  }, [connectedKey, partialKey]);
 
   // Every time this screen opens, quietly re-check each connected account with the platform itself.
   useEffect(() => {
@@ -142,7 +157,7 @@ export function ConnectionsPanel() {
     <div className="space-y-5">
       <div>
         <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Connect your ad & social accounts</h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">It takes about a minute per account. No technical knowledge needed.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Press Connect, sign in on the platform’s own page and approve. That’s it. No technical knowledge needed.</p>
       </div>
 
       <ol className="grid sm:grid-cols-3 gap-2.5 text-xs">
@@ -163,6 +178,7 @@ export function ConnectionsPanel() {
           <CheckCircle2 size={15} className="mt-0.5 shrink-0" /> Connected and verified with {SHORT[connectedKey as ConnectionInfo['key']] || 'the platform'}.
         </div>
       )}
+      {importMsg && <p className="flex items-center gap-2 text-xs font-semibold px-3 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200">{importMsg.startsWith('Importing') && <Loader2 size={13} className="animate-spin" />} {importMsg}</p>}
       {partialKey && (
         <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 font-semibold">
           <AlertTriangle size={15} className="mt-0.5 shrink-0" /> Connected, but the platform did not grant every permission you chose. See the list below and press “Allow missing permissions”.
@@ -197,7 +213,7 @@ export function ConnectionsPanel() {
             <div key={c.key} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <PlatformBadge id={BADGE[c.key]} size={42} />
+                  <Logos k={c.key} size={44} />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">{SHORT[c.key]}</h3>
@@ -222,20 +238,18 @@ export function ConnectionsPanel() {
                     </>
                   ) : c.configured ? (
                     canManage && <button type="button" onClick={() => setModal({ conn: c })} className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold bg-[#2A6FE0] text-white hover:bg-blue-700 cursor-pointer"><Link2 size={13} /> {c.needsReconnect ? 'Reconnect' : 'Connect'}</button>
+                  ) : isAdmin ? (
+                    <Link href="/settings?section=setup" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-900 hover:bg-amber-200">Finish setup</Link>
                   ) : (
-                    <span className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">Coming soon</span>
+                    <span className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">Not available yet</span>
                   )}
                 </div>
               </div>
 
               {!c.configured && !c.connected && (
-                <details className="mt-3 text-[11px] text-slate-500">
-                  <summary className="cursor-pointer font-semibold select-none">Site owner: how to switch this on</summary>
-                  <p className="mt-1.5 leading-relaxed">
-                    Create a developer app for this platform and add <code className="font-mono font-bold">{c.missingEnv.join(', ')}</code> to the Vercel environment variables. Register <code className="font-mono font-bold">/api/connect/{c.key}/callback</code> as the redirect URL.{' '}
-                    <a href={c.docsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-bold underline">Developer docs <ExternalLink size={10} /></a>
-                  </p>
-                </details>
+                <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
+                  {isAdmin ? 'This platform needs a one-time setup before anyone can connect it.' : 'Your administrator needs to switch this platform on first. Nothing is needed from you.'}
+                </p>
               )}
 
               {(c.connected || c.needsReconnect) && v && (

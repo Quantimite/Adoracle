@@ -111,3 +111,19 @@ export async function duplicate(workspaceId: string, level: Level, id: string) {
     data: { adSetId: d.adSetId, campaignId: d.campaignId, name: `${d.name} (copy)`, status: 'PAUSED', format: d.format, primaryText: d.primaryText, headline: d.headline, description: d.description, cta: d.cta, destinationUrl: d.destinationUrl, mediaUrl: d.mediaUrl, mediaType: d.mediaType, sourcePostId: d.sourcePostId, sourcePostUrl: d.sourcePostUrl },
   });
 }
+
+/** Switch ad sets / ads on or off on the platform (Meta) when they were created there. */
+export async function syncItemStatus(workspaceId: string, platform: string, externalIds: (string | null)[], status: 'ACTIVE' | 'PAUSED'): Promise<string> {
+  const ids = externalIds.filter((x): x is string => !!x);
+  if (!ids.length) return 'Saved here (not created on the platform yet).';
+  if (platform !== 'META') return 'Saved here.';
+  try {
+    const conn = await getConnection(workspaceId, 'META');
+    if (!conn) return 'Saved here. Reconnect Meta to update the platform.';
+    const { setMetaStatus } = await import('@/backend/services/metaPublish');
+    for (const id of ids) await setMetaStatus(id, conn.accessToken, status);
+    return `Updated on Meta (${status.toLowerCase()}).`;
+  } catch (e: any) {
+    return `Saved here, but Meta did not accept the change: ${e?.message || 'unknown error'}`;
+  }
+}

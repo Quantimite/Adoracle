@@ -7,36 +7,24 @@ import bcrypt from 'bcryptjs';
 import { db } from '@/backend/db/client';
 import { getOrCreateUserWorkspace } from '@/backend/db/workspace';
 
-const googleClientId =
-    process.env.AUTH_GOOGLE_ID ||
-    process.env.GOOGLE_CLIENT_ID ||
-    '';
-
-const googleClientSecret =
-    process.env.AUTH_GOOGLE_SECRET ||
-    process.env.GOOGLE_CLIENT_SECRET ||
-    '';
-
-const authSecret =
-    process.env.AUTH_SECRET ||
-    process.env.BETTER_AUTH_SECRET ||
-    process.env.NEXTAUTH_SECRET;
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(db),
     session: { strategy: 'jwt', maxAge: 60 * 60 * 24 * 30 },
-    secret: authSecret,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
     // Required on Vercel so Auth.js trusts the deployment host (fixes callback URL problems)
     trustHost: true,
-    debug: process.env.NODE_ENV === 'development',
     pages: {
         signIn: '/login',
         error: '/login',
     },
     providers: [
         Google({
-            clientId: googleClientId,
-            clientSecret: googleClientSecret,
+            clientId: process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID || '',
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET || '',
+            // FIX for "OAuthAccountNotLinked":
+            // A person who first registered with email + password and later clicks
+            // "Continue with Google" using the SAME email is now linked to the same account
+            // instead of being rejected. This is safe because Google verifies email ownership.
             allowDangerousEmailAccountLinking: true,
         }),
         Credentials({

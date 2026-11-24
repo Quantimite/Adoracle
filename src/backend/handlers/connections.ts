@@ -4,6 +4,7 @@ import { getCtx, unauthorized, forbidden, canEdit } from '@/backend/auth/session
 import { decryptToken } from '@/backend/security/encryption';
 import { PROVIDERS, ProviderKey, isProviderKey, providerConfigured, missingEnv } from '@/backend/integrations/oauth';
 import { FEATURES, PROVIDER_FEATURES } from '@/shared/connectFeatures';
+import { isSiteAdmin } from '@/backend/auth/admin';
 
 /** GET → status of every platform for this workspace (never returns tokens). */
 export async function GET() {
@@ -49,6 +50,7 @@ export async function GET() {
     connections,
     features: FEATURES.map((f) => ({ id: f.id, title: f.title, plain: f.plain, supported: Object.fromEntries((Object.keys(PROVIDERS) as ProviderKey[]).map((k) => [k, PROVIDER_FEATURES[k].includes(f.id)])) })),
     canManage: canEdit(ctx),
+    isAdmin: isSiteAdmin(ctx.email),
   });
 }
 
